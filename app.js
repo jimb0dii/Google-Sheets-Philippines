@@ -11,7 +11,7 @@ let app = express(),
 app.use(cors());
 
 // Set Static Path
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 
 //Get data from Spreadsheets
 app.get('/maps', function(req, res){
@@ -20,6 +20,4 @@ app.get('/maps', function(req, res){
 	})
 })
 
-app.listen(3000, function(){
-	console.log('Server started in Port 3000');
-})
+module.exports = app;
