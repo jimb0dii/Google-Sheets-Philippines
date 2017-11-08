@@ -1,5 +1,5 @@
-const app = require('./app'),
-	http = require('http');
+const http = require('http'),
+	app = require('./app');
 
 let port = process.env.PORT || 80;
 app.set('port', port);
