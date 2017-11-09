@@ -7,7 +7,7 @@ let googleAuth = require('google-auth-library');
 let SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
 let TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
 	process.env.USERPROFILE) + '/.credentials/';
-let TOKEN_PATH = TOKEN_DIR + 'sheets.googleapis.com-nodejs-quickstart.json';
+let TOKEN_PATH = 'sheets.googleapis.com-nodejs-quickstart.json';
 
 exports.listMunicipalities = function(id, callback) {
 	// Load client secrets from a local file.
@@ -101,31 +101,36 @@ exports.listMunicipalities = function(id, callback) {
 	*/
 	function listTable(auth) {
 		let sheets = google.sheets('v4');
-		sheets.spreadsheets.values.get({
+		sheets.spreadsheets.values.batchGet({
 			auth: auth,
 			spreadsheetId: id,
-			range: 'A2:C',
-		}, function(err, response) {
+			ranges: [
+				`1:1`,
+				`A2:Z`
+			]
+		}, (err,response) => {
 			if (err) {
 				console.log('The API returned an error: ' + err);
 				return;
 			}
-			let rows = response.values;
+			let rows = response.valueRanges;
 			if (rows.length == 0) {
 				console.log('No data found.');
 			} else {
-				let arr = [];
-				for (let i = 0; i < rows.length; i++) {
-					let row = rows[i];
-					// Print columns A and E, which correspond to indices 0 and 4.
-					let data = {
-						"province": row[0],
-						"municipalities": row[1],
-						"coordinates": row[2]
-					}
-					arr.push(data);
-				}
-				callback(null, arr);
+				let getKeys = rows[0].values;
+				let keys = getKeys[0];
+				keys = keys.map(name => name.split(" ").join("_").toLowerCase());
+				let values = rows[1].values;
+
+				let data = values.map(value => {
+					let result = {};
+					keys.forEach((keys, idx) => result[keys] = value[idx]);
+					return result;
+				});
+
+				let obj = data
+
+				callback(null,obj);
 			}
 		});
 	}
